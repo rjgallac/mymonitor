@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width_device-width, initial-scale=1.0" />
+        <title>MyMonitor Dashboard</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+        <style>
+            body {
+                background-color: #0f172a;
+                color: #e2e8f0;
+            }
+        </style>
+    </head>
+    <body class="p-8">
+        <div class="max-w-6xl mx-auto">
+            <header class="mb-12 border-b border-slate-700 pb-6">
+                <h1 class="text-4xl font-bold text-blue-400">
+                    MyMonitor Dashboard
+                </h1>
+                <p class="text-slate-400">
+                    Real-time Infrastructure Monitoring
+                </p>
+            </header>
+
+            <div class="grid grid-cols-1 md:grid_cols-2 gap-8">
+                <!-- Section: Server Metrics -->
+                <section>
+                    <h2 class="text-2xl font-semibold mb-6 flex items-center">
+                        <span class="mr-2 text-blue-500">🖥️</span> Active
+                        Servers
+                    </h2>
+                    <div class="space-y-4">
+                        {% if servers %} {% for server in servers %}
+                        <div
+                            class="bg-slate-800 p-6 rounded-xl border border-slate-700 shadow-lg"
+                        >
+                            <div class="flex justify-between items-center mb-4">
+                                <h3 class="text-xl font-bold text-white">
+                                    {{ server.hostname }}
+                                </h3>
+                                <span class="text-xs text-slate-500"
+                                    >Last update: {{
+                                    server.timestamp.strftime('%H:%M:%S') if
+                                    server.timestamp else 'N/A' }}</span
+                                >
+                            </div>
+                            <div class="grid grid-cols-3 gap-4">
+                                <div class="text-center">
+                                    <p class="text-xs text-slate-400 uppercase">
+                                        CPU
+                                    </p>
+                                    <p
+                                        class="text-lg font-mono {{ 'text-red-400' if server.cpu_usage > 85 else 'text-green-4	00' }}"
+                                    >
+                                        {{ server.cpu_usage }}%
+                                    </p>
+                                </div>
+                                <div class="text-center">
+                                    <p class="text-xs text-slate-400 uppercase">
+                                        RAM
+                                    </p>
+                                    <p
+                                        class="text-lg font-mono {{ 'text-red-400' if server.memory_usage > 85 else 'text-green-400' }}"
+                                    >
+                                        {{ server.memory_usage }}%
+                                    </p>
+                                </div>
+                                <div class="text-center">
+                                    <p class="text-xs text-slate-400 uppercase">
+                                        Disk
+                                    </p>
+                                    <p
+                                        class="text-lg font-mono {{ 'text-red-400' if server.disk_usage > 90 else 'text-green-400' }}"
+                                    >
+                                        {{ server.disk_usage }}%
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %} {% else %}
+                        <div
+                            class
+                            class="bg-slate-800 p-6 rounded-xl text-slate-500 italic"
+                        >
+                            No servers reporting yet...
+                        </div>
+                        {% endif %}
+                    </div>
+                </section>
+
+                <!-- Section: Website Uptime -->
+                <section>
+                    <h2 class="text-2xl font-semibold mb-6 flex items-center">
+                        <span class="mr-2 text-green-500">🌐</span> Website
+                        Status
+                    </h2>
+                    <div class="space-y-4">
+                        {% if websites %} {% for site in websites %}
+                        <div
+                            class="bg-slate-800 p-6 rounded-xl border border-slate-700 shadow-lg flex justify-between items-center"
+                        >
+                            <div>
+                                <h3 class="text-lg font-bold text-white">
+                                    {{ site.name }}
+                                </h3>
+                                <p class="text-sm text-slate-400">
+                                    {{ site.url }}
+                                </p>
+                            </div>
+                            <div class="flex items-center">
+                                {% if site.is_up %}
+                                <span
+                                    class="px-3 py-1 rounded-full text-xs font-bold bg-green-900 text-green-300 border border-green-700"
+                                    >UP</span
+                                >
+                                {% else %}
+                                <span
+                                    class="px-3 py-1 rounded-full text-xs font-bold bg-red-900 text-red-300 border border-red-700"
+                                    >DOWN</span
+                                >
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %} {% else %}
+                        <div
+                            class="bg-slate-800 p-6 rounded-xl text-slate-500 italic"
+                        >
+                            No websites configured...
+                        </div>
+                        {% endif %}
+                    </div>
+                </section>
+            </div>
+
+            <footer class="mt-12 text-center text-slate-600 text-sm">
+                Auto-refreshing every 60 seconds.
+            </footer>
+        </div>
+    </body>
+</html>
