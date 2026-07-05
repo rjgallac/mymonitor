@@ -4,7 +4,7 @@ from datetime import datetime, timezone
 from typing import List
 
 import httpx
-from fastapi import Depends, FastAPI, Request
+from fastapi import Depends, FastAPI, Request, Response
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 from sqlalchemy import (
@@ -188,7 +188,7 @@ def get_latest_metrics(db: Session = Depends(get_db)):
     return results
 
 
-@app.get("/dashboard", response_class=None)
+@app.get("/dashboard", response_class=Response)
 async def dashboard(request: Request, db: Session = Depends(get_db)):
     servers_data = []
     for s in db.query(ServerRecord).all():
@@ -227,8 +227,9 @@ async def dashboard(request: Request, db: Session = Depends(get_db)):
                 }
             )
 
-        return templates.TemplateResponse(
-            request=request,
-            name="dashboard.html",
-            context={"servers": servers_data, "web_sites": websites_data},
-        )
+    # THIS LINE MUST BE OUTSIDE THE FOR LOOP
+    return templates.TemplateResponse(
+        request=request,
+        name="dashboard.html",
+        context={"servers": servers_data, "web_sites": websites_data},
+    )
