@@ -24,9 +24,7 @@ SQLALCHEMY_DATABASE_URL = "sqlite:///./monitor.db"
 engine = create_engine(
     SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False}
 )
-SessionLocal = session_factory = sessionmaker(
-    autocommit=False, autoflush=False, bind=engine
-)
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
 
@@ -145,7 +143,7 @@ def report_metrics(metrics: MetricInput, db: Session = Depends(get_db)):
         db.commit()
         db.refresh(server)
 
-    new_metric = MetricRecord(
+    new_metric = Metric_record = MetricRecord(
         server_id=server.id,
         cpu_usage=metrics.cpu_usage,
         memory_usage=metrics.memory_usage,
@@ -179,9 +177,9 @@ def get_latest_metrics(db: Session = Depends(get_db)):
             results.append(
                 {
                     "hostname": s.hostname,
-                    "cpu_usage": latest.cpu_usage,
-                    "memory_usage": latest.memory_usage,
-                    "disk_usage": latest.disk_usage,
+                    "api_cpu_usage": latest.cpu_usage,
+                    "api_memory_usage": latest.memory_usage,
+                    "api_disk_usage": latest.disk_usage,
                     "timestamp": latest.timestamp,
                 }
             )
@@ -217,19 +215,17 @@ async def dashboard(request: Request, db: Session = Depends(get_db)):
             .order_by(CheckResult.timestamp.desc())
             .first()
         )
-        if latest_check:
-            websites_data.append(
-                {
-                    "name": site.name,
-                    "url": site.url,
-                    "is_up": latest_check.is_up,
-                    "last_check": latest_check.timestamp,
-                }
-            )
+        websites_data.append(
+            {
+                "name": site.name,
+                "url": site.url,
+                "is_up": latest_check.is_up if latest_check else None,
+                "last_check": latest_check.timestamp if latest_check else None,
+            }
+        )
 
-    # THIS LINE MUST BE OUTSIDE THE FOR LOOP
     return templates.TemplateResponse(
         request=request,
         name="dashboard.html",
-        context={"servers": servers_data, "web_sites": websites_data},
+        context={"servers": servers_data, "websites": websites_data},
     )
