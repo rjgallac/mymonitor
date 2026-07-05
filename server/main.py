@@ -188,6 +188,11 @@ def get_latest_metrics(db: Session = Depends(get_db)):
 
 @app.get("/dashboard", response_class=Response)
 async def dashboard(request: Request, db: Session = Depends(get_db)):
+    from datetime import datetime, timedelta, timezone
+
+    now = datetime.now(timezone.utc)
+    heartbeat_threshold = timedelta(minutes=5)
+
     servers_data = []
     for s in db.query(ServerRecord).all():
         latest = (
@@ -196,16 +201,26 @@ async def dashboard(request: Request, db: Session = Depends(get_db)):
             .order_by(MetricRecord.timestamp.desc())
             .first()
         )
+
+        is_up = False
         if latest:
-            servers_data.append(
-                {
-                    "hostname": s.hostname,
-                    "cpu_usage": latest.cpu_usage,
-                    "memory_usage": latest.memory_usage,
-                    "disk_usage": latest.disk_usage,
-                    "timestamp": latest.timestamp,
-                }
-            )
+            ts = latest.timestamp
+            if ts.tzinfo is None:
+                ts = ts.replace(tzinfo=timezone.utc)
+
+            if now - ts < heartbeat_threshold:
+                is_up = True
+
+        servers_data.append(
+            {
+                "hostname": s.hostname,
+                "cpu_usage": latest.cpu_usage if latest else 0,
+                "memory_usage": latest.memory_usage if latest else 0,
+                "disk_usage": latest.disk_usage if latest else 0,
+                "timestamp": latest.timestamp,
+                "is_up": is_up,
+            }
+        )
 
     websites_data = []
     for site in db.query(WebsiteToTrack).all():

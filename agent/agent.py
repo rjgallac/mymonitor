@@ -1,3 +1,4 @@
+import argparse
 import os
 import socket
 import time
@@ -6,8 +7,8 @@ import psutil
 import requests
 
 # --- Configuration ---
-# Change this to the IP address of your Central Server
-SERVER_URL = "http://localhost:8000/report"
+# Default value if environment variable is not set
+DEFAULT_SERVER_URL = "http://localhost:8000/report"
 # How often to report (in seconds)
 REPORT_INTERVAL = 10
 
@@ -21,11 +22,11 @@ def get_metrics():
     }
 
 
-def run_agent():
+def run_agent(server_url: str):
     # Get the hostname so the server knows which machine this is
     hostname = socket.gethostname()
     print(f"[*] Starting Monitor Agent for: {hostname}")
-    print(f"[*] Reporting to: {SERVER_URL}")
+    print(f"[*] Reporting to: {server_url}")
     print(f"[*] Interval: {REPORT_INTERVAL}s")
 
     while True:
@@ -42,7 +43,7 @@ def run_agent():
             }
 
             # 3. Send to server
-            response = requests.post(SERVER_URL, json=payload, timeout=5)
+            response = requests.post(server_url, json=payload, timeout=5)
 
             if response.status_code == 200:
                 print(f"[+] Successfully reported: {metrics}")
@@ -61,4 +62,13 @@ def run_agent():
 
 
 if __name__ == "__main__":
-    run_agent()
+    parser = argparse.ArgumentParser(description="MyMonitor Agent")
+    parser.add_argument(
+        "--server-url",
+        type=str,
+        default=os.getenv("SERVER_URL", DEFAULT_SERVER_URL),
+        help="The URL of the Central Server (overrides environment variable)",
+    )
+    args = parser.parse_args()
+
+    run_agent(args.server_url)
