@@ -2,9 +2,14 @@
 
 python -m venv .venv
 
-source .venv/Scripts/activate
-# OR
-# source .venv/bin/activate
+# Windows (Command Prompt)
+.venv\Scripts\activate
+
+# Windows (PowerShell)
+.\.venv\Scripts\Scripts\Activate.ps1
+
+# Linux/macOS
+source .venv/bin/activate
 
 pip install -r requirements.txt
 
@@ -40,4 +45,7 @@ docker run -e SERVER_URL="http://host.docker.internal:8000/report" \
   mymonitor-agent
 ```
 
-*Note: If you are on Linux, you may also need to add `--add-host=host.docker.internal:host-gateway` if you aren't using `--network=host`.*
+### Windows (Docker Desktop)
+**Note:** True host-aware monitoring of the Windows hardware is **not supported** via Docker containers on Windows. Because Docker runs inside a Linux VM (WSL2), the "Host" seen by the container is actually the virtualized Linux environment, not your Windows OS. 
+
+To monitor your Windows host, run the agent **locally** using the "Local Setup" instructions above instead of using Docker.

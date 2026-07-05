@@ -104,17 +104,19 @@
                     <div class="space-y-4">
                         {% if websites %} {% for site in websites %}
                         <div
-                            class="bg-slate-800 p-6 rounded-xl border border-slate-700 shadow-lg flex justify-between items-center"
+                            class="bg-slate-800 p-6 rounded-xl border border-slate-700 shadow-lg flex justify-between items-center gap-4"
                         >
-                            <div>
-                                <h3 class="text-lg font-bold text-white">
+                            <div class="min-w-0">
+                                <h3
+                                    class="text-lg font-bold text-white truncate"
+                                >
                                     {{ site.name }}
                                 </h3>
-                                <p class="text-sm text-slate-400">
+                                <p class="text-sm text-slate-400 truncate">
                                     {{ site.url }}
                                 </p>
                             </div>
-                            <div class="flex items-center">
+                            <div class="flex items-center flex-shrink-0">
                                 {% if site.is_up %}
                                 <span
                                     class="px-3 py-1 rounded-full text-xs font-bold bg-green-900 text-green-300 border border-green-700"
